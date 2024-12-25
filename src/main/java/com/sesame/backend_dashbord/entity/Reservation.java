@@ -1,27 +1,26 @@
 package com.sesame.backend_dashbord.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Date;
 
 @Entity
 @Getter
 @Setter
-public class User {
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String statut;
+    private Date date;
 
-    private String username;
-    private String password;
-    private String role;
+    @ManyToOne
+    private User user;
 
-    @OneToMany
-    List<Reservation> reservations;
+    @ManyToOne
+    private HotelOffer hotelOffer;
 
 }
-
