@@ -22,5 +22,8 @@ public class Reservation {
 
     @ManyToOne
     private HotelOffer hotelOffer;
+    public Reservation() {
+        this.date = new Date();
+    }
 
 }

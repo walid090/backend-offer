@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,10 +51,19 @@ public class HotelController {
     public HotelOffer createHotelOffer(@RequestBody HotelOffer hotelOffer) {
         return hotelService.createHotelOffer(hotelOffer);
     }
+    @PostMapping("/createReservation")
+    public Reservation createReservation(@RequestBody Reservation reservation) {
+        return hotelService.createReservation(reservation);
+    }
 
     @PutMapping("/updateHotelOffer")
     public HotelOffer updateHotelOffer(@RequestBody HotelOffer hotelOffer) {
         return hotelService.updateHotelOffer(hotelOffer);
+    }
+
+    @PostMapping("/AddUser")
+    public User addUser(@RequestBody User user) {
+           return hotelService.AddUser(user);
     }
 
     @DeleteMapping("/deleteHotelOffer/{id}")
@@ -96,44 +106,39 @@ public class HotelController {
         hotelService.deleteReservation(id);
     }
 
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws IOException {
+        String imagePath = "src/main/resources/assets/" + imageName;
+        File imageFile = new File(imagePath);
 
-    private final Path imageStoragePath = Paths.get("src/main/resources/assets");
-
-    @GetMapping("image/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
-        try {
-            // Assuming you have a saved path to the image
-            String savedImagePath = "/absolute/path/to/images/" + imageName;
-
-            // Create a Path object for the image
-            Path imagePath = Paths.get(imageStoragePath+imageName);
-            UrlResource imageResource = new UrlResource(imagePath.toUri());
-
-            // Check if the resource exists and is readable
-            if (imageResource.exists() && imageResource.isReadable()) {
-                // Return the image with the correct content type
-                String contentType = Files.probeContentType(imagePath);
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .body((Resource) imageResource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-        } catch (Exception e) {
-            // Log the exception for debugging purposes
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (!imageFile.exists()) {
+            System.out.println("File does not exist");
+            return ResponseEntity.notFound().build();
         }
+
+        byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+        return ResponseEntity.ok().body(imageBytes);
     }
 
     @GetMapping("/CountReservationsbyStatus")
     public Map CountReservationsbyStatus(){
         return hotelService.CountReservationsbyStatus();
     }
+
     @GetMapping("/CountReservationsbyByMonths/{months}")
         public Map CountReservationsbyByMonths(@PathVariable("months") int months){
         return hotelService.CountReservationsbyByMonths(months);
         }
+
+    @DeleteMapping("images/{imageName}")
+    public ResponseEntity<String> deleteImage(@PathVariable String imageName) {
+        boolean isDeleted = hotelService.deleteImage(imageName);
+        if (isDeleted) {
+            return ResponseEntity.ok("Image deleted successfully");
+        } else {
+            return ResponseEntity.status(500).body("Error deleting image");
+        }
+    }
 }
 
 

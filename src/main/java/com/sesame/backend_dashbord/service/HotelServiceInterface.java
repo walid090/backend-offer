@@ -24,5 +24,7 @@ public interface HotelServiceInterface {
     void deleteReservation(Long id);
     Map<String, Integer> CountReservationsbyStatus();
     Map<Date, Integer> CountReservationsbyByMonths(Integer Months);
-
+    User AddUser(User user);
+    Reservation createReservation(Reservation reservation);
+    boolean deleteImage(String imageName);
 }

@@ -34,6 +34,9 @@ public class HotelServiceImpl  implements HotelServiceInterface{
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private UserRepository UserRepository;
+
 
     @Override
     public Iterable<HotelOffer> getAllHotelOffers() {
@@ -137,22 +140,55 @@ public class HotelServiceImpl  implements HotelServiceInterface{
         return map;
     }
 
-    @Override
     public Map<Date, Integer> CountReservationsbyByMonths(Integer Months) {
         Iterable<Reservation> reservations = reservationRepository.findAll();
         Map<Date, Integer> map = new HashMap<>();
-        int p=0;
+
         for (Reservation reservation : reservations) {
-            if (Objects.equals(reservation.getDate().getMonth(), Months)){
-                Date day = reservation.getDate();
-                // Strip the time information (optional, to just get the day part)
-                day.setHours(0);
-                day.setMinutes(0);
-                day.setSeconds(0);
-                map.put(day, map.getOrDefault(day, 0) + 1);
+            Date reservationDate = reservation.getDate();
+
+            // Ensure the month matches
+            if (reservationDate.getMonth() == Months) {
+                // Normalize the date (strip time information)
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(reservationDate);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+
+                Date normalizedDate = calendar.getTime();
+
+                // Add to the map
+                map.put(normalizedDate, map.getOrDefault(normalizedDate, 0) + 1);
             }
         }
+
         return map;
+    }
+
+    @Override
+    public User AddUser(User user) {
+        return UserRepository.save(user);
+    }
+
+    @Override
+    public Reservation createReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
+    @Override
+    public boolean deleteImage(String imageName) {
+        try {
+            File file = Paths.get(UPLOAD_DIR, imageName).toFile();
+            if (file.exists()) {
+                return file.delete(); // Delete the image file
+            }
+            return false; // File doesn't exist
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }
